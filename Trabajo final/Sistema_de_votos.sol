@@ -3,17 +3,22 @@
 pragma solidity ^0.8.13;
 
 //Smart Contract para crear un sistema de votación.
+
 contract election {
     //Mapping para comprobar las direcciones de los votantes
+
     mapping(address=>bool) public voters;
-    //Estructura de la elección.
+    
+    //Estructura de la elección para votar.
+
     struct Choice {
         uint id;
         string name;
         uint votes;
     }
 
-    //Estructura de la campaña de votación.
+    //Estructura del sistema de votación.
+    
     struct Ballot{
         uint id;
         string name;
@@ -23,13 +28,13 @@ contract election {
     //Mapping de las elecciones.
     mapping(uint => Ballot) private ballots;
 
-    //Variable para proxima votación.
+    //Designacion de variable para la proxima votación.
     uint private nextBallotId;
 
      // Número total de votantes.
     uint public totalVoters;
 
-    //Dirección del admin del sistema de votación.
+    //Dirección del administrador del sistema de votación.
     address public admin;
 
     //Mapping para comprobar si ya se ha votado.
@@ -39,13 +44,13 @@ contract election {
     uint  limite_votos;
     uint cant_votos = 1;
 
-    //El admin es el que crea el smart contract y habrá una cantidad limite de votos
+    //El administrador es el creador del smart contract y establece una cantidad limite de votos
     constructor()  {
         admin = msg.sender;
         limite_votos = cant_votos;
     }
 
-    //Función para añadir votantes (solo lo puede hacer el admin).
+    //Función para añadir votantes (solo lo puede hacer el administrador).
     function addVoters(address[] calldata _voters) external onlyAdmin(){
         //Añadiendo a los votantes en bucle.
         for(uint i = 0; i<_voters.length ;i++){
@@ -57,7 +62,7 @@ contract election {
 
     //Función para crear la campaña de votación.
      function createBallot(string memory name, string[] memory choices, uint duration) public onlyAdmin {
-        // Definir variable de id
+        // Definir variable de identificacion
         uint id = nextBallotId++;
         // Definir variable del nombre de la campaña de votación
         ballots[id].name = name;
@@ -77,11 +82,11 @@ contract election {
     }
     //Función de votar
     function vote(uint ballotId, uint choiceId)external{
-        //Require de que solo los votantes pueden votar
+        //Solo los votantes pueden votar
         require(voters[msg.sender] == true);
-        //Require de que solo se puede votar una vez.
+        //Solo se puede votar una vez.
         require(votes[msg.sender][ballotId] == false);
-        //Require que solo se puede votar antes de finalizar la campaña.
+        //Solo se puede votar antes de finalizar la campaña.
         require(block.timestamp < ballots[ballotId].end);
         //Cambiar el bolleano de los votos a true.
         votes[msg.sender][ballotId] =true;
@@ -91,13 +96,11 @@ contract election {
 
     //Función para comprobar el resultado
     function results( uint ballotId) public view returns(Choice[]memory){
-        //Require solo se puede comprobar una vez finalizada la campaña.
+        //Solo se puede comprobar una vez finalizada la campaña.
         require(block.timestamp> ballots[ballotId].end, "La votacion todavia no ha finalizado");
         //Retornar la elección de la votación.
         return ballots[ballotId].choices;
          
-    
     }
-
 
 }
